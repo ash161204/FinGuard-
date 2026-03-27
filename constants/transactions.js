@@ -1,0 +1,18 @@
+﻿export const MOCK_TRANSACTIONS = [
+  { id: 1, amount: 450, merchant: "Zomato", date: "Oct 24", category: "food" },
+  { id: 2, amount: 1299, merchant: "Amazon", date: "Oct 24", category: "shopping" },
+  { id: 3, amount: 899, merchant: "Airtel", date: "Oct 24", category: "bills" },
+  { id: 4, amount: 210, merchant: "Uber Auto", date: "Oct 24", category: "transport" },
+  { id: 5, amount: 320, merchant: "Swiggy", date: "Oct 25", category: "food" },
+  { id: 6, amount: 1899, merchant: "Myntra", date: "Oct 25", category: "shopping" },
+  { id: 7, amount: 1450, merchant: "BSES", date: "Oct 25", category: "bills" },
+  { id: 8, amount: 180, merchant: "Metro Card", date: "Oct 25", category: "transport" },
+  { id: 9, amount: 520, merchant: "Cafe Coffee Day", date: "Oct 26", category: "food" },
+  { id: 10, amount: 2499, merchant: "Nykaa", date: "Oct 26", category: "shopping" },
+  { id: 11, amount: 699, merchant: "JioFiber", date: "Oct 26", category: "bills" },
+  { id: 12, amount: 310, merchant: "Rapido", date: "Oct 26", category: "transport" },
+  { id: 13, amount: 610, merchant: "Pizza Hut", date: "Oct 27", category: "food" },
+  { id: 14, amount: 1599, merchant: "Ajio", date: "Oct 27", category: "shopping" },
+  { id: 15, amount: 260, merchant: "Ola", date: "Oct 27", category: "transport" },
+  { id: 16, amount: 1199, merchant: "Tata Play", date: "Oct 27", category: "bills" },
+];

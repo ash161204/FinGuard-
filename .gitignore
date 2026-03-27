@@ -1,0 +1,20 @@
+# Node / Expo
+node_modules/
+.expo/
+dist/
+web-build/
+
+# Env / secrets
+.env
+backend/.env
+
+# Python
+backend/.venv/
+backend/**/__pycache__/
+backend/**/*.pyc
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

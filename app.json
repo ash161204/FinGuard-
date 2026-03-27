@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "FinGuard AI",
+    "slug": "finguard-ai",
+    "scheme": "finguardai",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": false
+    },
+    "android": {
+      "package": "com.hackathon.finguardai"
+    },
+    "ios": {
+      "bundleIdentifier": "com.hackathon.finguardai"
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
