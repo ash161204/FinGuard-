@@ -1,76 +1,58 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useAppContext } from "../context/AppContext";
 import { formatCurrency } from "../utils/finance";
+import { BubblesAvatar, SpeechBubble } from "../components/Bubbles";
+import { T } from "../components/theme";
 
 const titleCase = (value) => value.charAt(0).toUpperCase() + value.slice(1);
 
-const buildFallbackReply = ({ topLeak, primaryGoal, riskVibe }) => {
-  const topLeakName = topLeak.amount ? titleCase(topLeak.key) : "lifestyle spend";
-
-  if (primaryGoal === "Debt") {
-    return `Debt-first move: cap ${topLeakName.toLowerCase()} this week, use the freed cash for your most expensive debt, and keep the rest of your budget boring on purpose. Risk vibe noted: ${riskVibe.toLowerCase()}.`;
-  }
-
-  if (primaryGoal === "Savings") {
-    return `Savings move: automate money away before you can spend it, then trim ${topLeakName.toLowerCase()} by one small habit this week. Your vibe is ${riskVibe.toLowerCase()}, so keep the plan realistic enough to repeat.`;
-  }
-
-  return `Emergency-fund move: start with one automatic transfer, then cut ${topLeakName.toLowerCase()} a little before cutting anything painful. With a ${riskVibe.toLowerCase()} risk vibe, consistency beats drama.`;
+const buildFallbackReply = ({ topLeak, primaryGoal, riskVibe, income }) => {
+  const leaks = topLeak.amount ? titleCase(topLeak.key) : "lifestyle spend";
+  const templates = [
+    `I see your primary goal is ${primaryGoal.toLowerCase()}. Automating even 10% of that ${formatCurrency(income)} income builds your safety net instantly. Try capping your ${leaks.toLowerCase()} this weekend!`,
+    `Hmm, a ${riskVibe.toLowerCase()} approach. Smart! Let's divert a little bit of that ${leaks.toLowerCase()} cash toward your actual goals.`,
+    `Remember, paying down your expensive debt first is a guaranteed return on investment. The math never lies! 📈`,
+    `You've got this! Start by tracking your ${leaks.toLowerCase()} closely this week. Every rupee counts.`,
+  ];
+  return templates[Math.floor(Math.random() * templates.length)];
 };
 
 const extractGeminiText = (payload) => {
   const parts = payload?.candidates?.[0]?.content?.parts;
-
-  if (!Array.isArray(parts)) {
-    return "";
-  }
-
-  return parts
-    .map((part) => part?.text || "")
-    .join("\n")
-    .trim();
+  if (!Array.isArray(parts)) return "";
+  return parts.map((part) => part?.text || "").join("\n").trim();
 };
 
 export default function CoachScreen() {
   const scrollViewRef = useRef(null);
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const [savageMode, setSavageMode] = useState(false);
   const [messages, setMessages] = useState([
     {
       id: "welcome",
       sender: "ai",
-      text: "I've analyzed your score. What financial decision can I help you with today?",
+      text: "I've analyzed your score. What financial decision can I help you with today? ✨",
     },
   ]);
 
-  const { income, needsSliderAmount, primaryGoal, riskVibe, swipedTotals, topLeak, totalSwipedAmount } =
-    useAppContext();
+  const { income, needsSliderAmount, primaryGoal, riskVibe, swipedTotals, topLeak, totalSwipedAmount } = useAppContext();
 
   const systemPrompt = useMemo(() => {
-    const lines = [
-      "You are FinGuard AI, a sharp but caring Gen-Z financial coach for young earners in India.",
-      `The user makes ${formatCurrency(income)} per month.`,
-      `Their monthly needs are ${formatCurrency(needsSliderAmount)}.`,
-      `Their primary goal is ${primaryGoal}.`,
-      `Their risk vibe is ${riskVibe}.`,
-      `Their swipe totals are Food ${formatCurrency(swipedTotals.food)}, Shopping ${formatCurrency(swipedTotals.shopping)}, Bills ${formatCurrency(swipedTotals.bills)}, and Transport ${formatCurrency(swipedTotals.transport)}.`,
-      `Their total categorized spend is ${formatCurrency(totalSwipedAmount)}.`,
-      `Their top leak is ${formatCurrency(topLeak.amount)} on ${topLeak.name}.`,
-      "Give practical, India-relevant advice in short paragraphs or bullet points. Always include a next step the user can do this week.",
-    ];
-
-    if (savageMode) {
-      lines.push(
-        "Roast the user sarcastically for their terrible spending habits before giving advice, but keep it playful and still genuinely useful.",
-      );
-    }
-
-    return lines.join(" ");
-  }, [income, needsSliderAmount, primaryGoal, riskVibe, swipedTotals, totalSwipedAmount, topLeak, savageMode]);
+    return [
+      "You are FinBuddy (specifically Bubbles), a cute, sharp, caring financial companion for young earners.",
+      "Keep responses concise, warm, actionable, and formatted in short bullet points or distinct paragraphs.",
+      `User monthly income: ${formatCurrency(income)}. Need expenses: ${formatCurrency(needsSliderAmount)}.`,
+      `Goal: ${primaryGoal}. Risk: ${riskVibe}.`,
+      `Swipe totals: Food ${formatCurrency(swipedTotals.food)}, Shopping ${formatCurrency(swipedTotals.shopping)}.`,
+      `Top leak: ${topLeak.name} (${formatCurrency(topLeak.amount)}).`,
+      "Never give boring generic advice. Be specific to their exact numbers! Stay in character as Bubbles.",
+    ].join(" ");
+  }, [income, needsSliderAmount, primaryGoal, riskVibe, swipedTotals, topLeak]);
 
   useEffect(() => {
     scrollViewRef.current?.scrollToEnd({ animated: true });
@@ -78,170 +60,126 @@ export default function CoachScreen() {
 
   const fetchGeminiReply = async (conversation) => {
     const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
-
-    if (!apiKey) {
-      return buildFallbackReply({ topLeak, primaryGoal, riskVibe });
-    }
+    if (!apiKey) return buildFallbackReply({ topLeak, primaryGoal, riskVibe, income });
 
     const response = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey,
-        },
+        headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
         body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: systemPrompt }],
-          },
-          contents: conversation.map((message) => ({
-            role: message.sender === "user" ? "user" : "model",
-            parts: [{ text: message.text }],
-          })),
-          generationConfig: {
-            temperature: savageMode ? 0.9 : 0.65,
-            maxOutputTokens: 260,
-          },
+          system_instruction: { parts: [{ text: systemPrompt }] },
+          contents: conversation.map((msg) => ({ role: msg.sender === "user" ? "user" : "model", parts: [{ text: msg.text }] })),
+          generationConfig: { temperature: 0.7, maxOutputTokens: 250 },
         }),
-      },
+      }
     );
 
-    if (!response.ok) {
-      throw new Error(`Gemini request failed with status ${response.status}`);
-    }
-
+    if (!response.ok) throw new Error("Gemini request failed");
     const payload = await response.json();
-    const text = extractGeminiText(payload);
-
-    if (!text) {
-      return buildFallbackReply({ topLeak, primaryGoal, riskVibe });
-    }
-
-    return text;
+    return extractGeminiText(payload) || buildFallbackReply({ topLeak, primaryGoal, riskVibe, income });
   };
 
   const handleSend = async () => {
     const trimmed = input.trim();
+    if (!trimmed || isSending) return;
 
-    if (!trimmed || isSending) {
-      return;
-    }
+    const userMsg = { id: `user-${Date.now()}`, sender: "user", text: trimmed };
+    const nextConvo = [...messages, userMsg];
 
-    const userMessage = {
-      id: `user-${Date.now()}`,
-      sender: "user",
-      text: trimmed,
-    };
-    const nextConversation = [...messages, userMessage];
-
-    setMessages(nextConversation);
+    setMessages(nextConvo);
     setInput("");
     setIsSending(true);
 
     try {
-      const reply = await fetchGeminiReply(nextConversation);
-
-      setMessages((current) => [
-        ...current,
-        {
-          id: `ai-${Date.now()}`,
-          sender: "ai",
-          text: reply,
-        },
-      ]);
-    } catch (error) {
-      setMessages((current) => [
-        ...current,
-        {
-          id: `ai-${Date.now()}`,
-          sender: "ai",
-          text: buildFallbackReply({ topLeak, primaryGoal, riskVibe }),
-        },
-      ]);
+      const reply = await fetchGeminiReply(nextConvo);
+      setMessages((curr) => [...curr, { id: `ai-${Date.now()}`, sender: "ai", text: reply }]);
+    } catch {
+      setMessages((curr) => [...curr, { id: `ai-${Date.now()}`, sender: "ai", text: buildFallbackReply({ topLeak, primaryGoal, riskVibe, income }) }]);
     } finally {
       setIsSending(false);
     }
   };
 
   return (
-    <View className="flex-1 bg-mist px-5 pt-16">
-      <Text className="text-sm font-medium uppercase tracking-[3px] text-teal">AI Coach</Text>
-      <Text className="mt-3 text-3xl font-extrabold text-ink">Ask for a practical next move.</Text>
-
-      <View className="mt-4 flex-row items-center justify-between rounded-[24px] bg-white px-4 py-3 shadow-soft">
-        <View>
-          <Text className="text-sm font-bold text-ink">Savage Mode</Text>
-          <Text className="mt-1 text-xs leading-5 text-slate-500">
-            Playful roast first, useful advice second.
-          </Text>
+    <SafeAreaView style={S.container}>
+      <LinearGradient colors={T.bgGrad} style={StyleSheet.absoluteFillObject} />
+      
+      {/* Header with Bubbles Avatar */}
+      <View style={S.header}>
+        <BubblesAvatar mood={isSending ? "thinking" : "happy"} size={80} />
+        <View style={S.headerTextContainer}>
+          <Text style={S.title}>AI Coach Bubbles</Text>
+          <Text style={S.subtitle}>Your interactive financial companion.</Text>
         </View>
-        <Pressable
-          onPress={() => setSavageMode((current) => !current)}
-          className={`rounded-full px-4 py-2 ${savageMode ? "bg-coral" : "bg-slate-200"}`}
+      </View>
+
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+        <ScrollView
+          ref={scrollViewRef}
+          contentContainerStyle={S.scrollContent}
+          keyboardShouldPersistTaps="handled"
         >
-          <Text className={`text-xs font-extrabold uppercase tracking-[1.5px] ${savageMode ? "text-white" : "text-slate-600"}`}>
-            {savageMode ? "On" : "Off"}
-          </Text>
-        </Pressable>
-      </View>
-
-      <View className="mt-4 rounded-[24px] bg-white px-4 py-4 shadow-soft">
-        <Text className="text-xs font-semibold uppercase tracking-[2px] text-slate-400">
-          Current Snapshot
-        </Text>
-        <Text className="mt-2 text-sm leading-6 text-slate-600">
-          Income {formatCurrency(income)} · Needs {formatCurrency(needsSliderAmount)} · Goal {primaryGoal} · Top leak {topLeak.name} {formatCurrency(topLeak.amount)}
-        </Text>
-      </View>
-
-      <ScrollView
-        ref={scrollViewRef}
-        contentContainerStyle={{ paddingTop: 24, paddingBottom: 24 }}
-        className="flex-1"
-        showsVerticalScrollIndicator={false}
-      >
-        {messages.map((message) => {
-          const isAI = message.sender === "ai";
-
-          return (
-            <View
-              key={message.id}
-              className={`mb-4 max-w-[88%] rounded-[24px] px-4 py-4 ${
-                isAI ? "self-start bg-white" : "self-end bg-ink"
-              }`}
-            >
-              <Text className={`text-base leading-7 ${isAI ? "text-slate-700" : "text-white"}`}>
-                {message.text}
-              </Text>
+          {messages.map((msg) => {
+            const isAI = msg.sender === "ai";
+            return (
+              <View key={msg.id} style={[S.messageWrapper, isAI ? S.aiWrapper : S.userWrapper]}>
+                {isAI ? (
+                  <View style={S.aiChatContainer}>
+                    <SpeechBubble text={msg.text} />
+                  </View>
+                ) : (
+                  <View style={S.userBubble}>
+                    <Text style={S.userText}>{msg.text}</Text>
+                  </View>
+                )}
+              </View>
+            );
+          })}
+          {isSending && (
+            <View style={[S.messageWrapper, S.aiWrapper]}>
+               <SpeechBubble text="Bubbles is thinking... 🤔" />
             </View>
-          );
-        })}
+          )}
+        </ScrollView>
 
-        {isSending ? (
-          <View className="mb-4 max-w-[72%] self-start rounded-[24px] bg-white px-4 py-4">
-            <Text className="text-base leading-7 text-slate-500">FinGuard AI is thinking...</Text>
-          </View>
-        ) : null}
-      </ScrollView>
-
-      <View className="mb-8 flex-row items-center rounded-[28px] bg-white px-3 py-3 shadow-soft">
-        <TextInput
-          value={input}
-          onChangeText={setInput}
-          placeholder="Should I save more or pay off bills first?"
-          placeholderTextColor="#94A3B8"
-          multiline
-          className="max-h-28 flex-1 px-3 py-2 text-base text-ink"
-        />
-        <Pressable
-          onPress={handleSend}
-          disabled={isSending}
-          className={`ml-3 h-12 w-12 items-center justify-center rounded-full ${isSending ? "bg-slate-300" : "bg-teal"}`}
-        >
-          <Ionicons name="send" size={20} color="#112236" />
-        </Pressable>
-      </View>
-    </View>
+        <View style={S.inputArea}>
+          <TextInput
+            style={S.input}
+            value={input}
+            onChangeText={setInput}
+            placeholder="Type your money question..."
+            placeholderTextColor={T.textSec}
+            multiline
+          />
+          <Pressable
+            style={[S.sendBtn, isSending && S.sendBtnDisabled]}
+            disabled={isSending}
+            onPress={handleSend}
+          >
+            <Ionicons name="send" size={20} color={T.textOnAccent} />
+          </Pressable>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
+
+const S = StyleSheet.create({
+  container: { flex: 1, backgroundColor: T.bg },
+  header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 20, paddingTop: 10, paddingBottom: 20, borderBottomWidth: 1, borderBottomColor: T.cardBorder },
+  headerTextContainer: { marginLeft: 16, flex: 1 },
+  title: { fontSize: 22, fontWeight: "900", color: T.gold, fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' },
+  subtitle: { fontSize: 13, color: T.textSec, marginTop: 4 },
+  scrollContent: { padding: 20, paddingBottom: 40 },
+  messageWrapper: { marginBottom: 20, width: "100%" },
+  aiWrapper: { alignItems: "flex-start", maxWidth: "90%" },
+  userWrapper: { alignItems: "flex-end", maxWidth: "88%", alignSelf: "flex-end" },
+  userBubble: { backgroundColor: T.gold, borderRadius: 20, padding: 16, borderBottomRightRadius: 4 },
+  userText: { color: T.textOnAccent, fontSize: 15, fontWeight: "600", lineHeight: 22 },
+  aiChatContainer: { flexDirection: "row", alignItems: "flex-end" },
+  inputArea: { flexDirection: "row", padding: 16, backgroundColor: T.card, borderTopColor: T.cardBorder, borderTopWidth: 1 },
+  input: { flex: 1, backgroundColor: "rgba(255,255,255,0.06)", borderRadius: 24, paddingHorizontal: 16, paddingVertical: 12, color: T.text, fontSize: 15, maxHeight: 100 },
+  sendBtn: { marginLeft: 12, width: 44, height: 44, borderRadius: 22, backgroundColor: T.teal, alignItems: "center", justifyContent: "center" },
+  sendBtnDisabled: { opacity: 0.5 },
+});

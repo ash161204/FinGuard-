@@ -3,14 +3,15 @@
 FinGuard AI is a hybrid Expo + FastAPI financial hackathon project.
 It combines a mobile-first React Native frontend with a Python backend that accepts uploaded PDFs, extracts and cleans their text, sends that text to Groq for structured parsing, and then turns the returned JSON into user-facing financial insights.
 
-The app currently behaves like a guided 3-step flow plus an AI coach:
+The app currently behaves like a guided 4-step flow plus an AI coach, fully styled in the dark-themed "FinBuddy" design language (Charcoal, Gold, Teal):
 
-1. Page 1 (`/`) captures onboarding inputs such as income, monthly needs, primary financial goal, and risk profile.
-2. Page 2 (`/swipe`) is now a document upload and analysis screen. Users upload one or more PDFs, and the app sends them to the backend for extraction and Groq analysis.
-3. Page 3 (`/dashboard`) converts the parsed JSON into two insight systems:
+1. Page 1 (`/`) captures onboarding inputs such as income, monthly needs, primary financial goal, and risk profile. It generates a baseline score.
+2. Page 2 (`/interstitial`) educates the user on the value of uploading actual documents.
+3. Page 3 (`/swipe`) is the Document Vault upload screen. Users upload PDFs, and the app sends them to the backend for extraction and Groq analysis.
+4. Page 4 (`/dashboard`) converts the parsed JSON into beautiful modular UI cards and two deep insight engines:
    - Tax Wizard
    - MF Portfolio X-Ray
-4. `/coach` is a separate AI chat experience powered by Gemini and the app's stored state.
+5. `/coach` is a separate AI chat experience powered by Gemini and our mascot "Bubbles".
 
 ---
 
@@ -46,6 +47,7 @@ Hackathon/
 |-- app/
 |   |-- _layout.js
 |   |-- index.js
+|   |-- interstitial.js
 |   |-- swipe.js
 |   |-- dashboard.js
 |   `-- coach.js
@@ -113,21 +115,24 @@ It does three important things:
 This file is effectively the frontend composition root.
 
 ### `app/index.js`
-This is Page 1, the onboarding screen.
+This is Page 1, the onboarding screen (styled in the deep FinBuddy theme).
 It is responsible for:
 
 - collecting user income
 - collecting the monthly-needs slider amount
 - collecting the primary financial goal
 - collecting the user's risk vibe
-- saving all onboarding values into `AppContext`
-- routing the user to `/swipe`
+- computing a baseline/lite score dynamically
+- forcing the user to complete setup before effortlessly routing to `/interstitial`
 
 The slider uses `@react-native-community/slider` rather than a custom hand-built slider, which makes the interaction much smoother and more accurate on mobile.
 
+### `app/interstitial.js`
+This is Page 2, a bridge screen highlighting the value proposition of taking the time to upload real PDFs. It splits routing strictly between forcing the user to the Upload Vault (`/swipe`) or skipping immediately to the Dashboard (`/dashboard`).
+
 ### `app/swipe.js`
 Despite the route name, this is no longer a card-swipe page.
-It is now the document-upload screen.
+It operates as the "Document Vault" upload screen.
 
 Responsibilities:
 
@@ -135,23 +140,22 @@ Responsibilities:
 - shows the backend base URL currently being used
 - uploads files to the backend using `utils/documentApi.js`
 - stores successful analysis results into `AppContext`
-- shows the returned JSON in the UI
-- routes to `/dashboard` when the user wants to view insights
-
+- renders parsed intelligence visually via structured rows
+- routes natively to `/dashboard` via a prominent CTA when the user finishes uploading
 This screen is the bridge between document ingestion and insight generation.
 
 ### `app/dashboard.js`
-This is Page 3, the insight page.
-It is entirely driven by the JSON stored in context from the upload page.
+This is Page 4, the full insight dashboard.
+It is completely devoid of raw text walls, using modular UI cards, an animated ScoreRing, and color-coded alerts.
 
 Responsibilities:
 
 - reads `documentResults` and `riskVibe` from `AppContext`
 - runs `buildTaxWizardReport(...)`
 - runs `buildMfXRayReport(...)`
-- renders a Tax Wizard section
-- renders an MF Portfolio X-Ray section
-- provides a CTA to continue to `/coach`
+- renders dynamic alerts based on identified constraints
+- renders expandable logic panels for the Tax Wizard and MF X-Ray (or shows locked empty-states if documents are missing)
+- provides a floating action button (FAB) to chat with the AI coach
 
 This page does not call the backend directly.
 Instead, it works as a pure interpretation layer over already-analyzed JSON.
@@ -372,12 +376,12 @@ This is independent from the backend parser and is focused on conversational gui
 ## 8. Environment Variables
 
 ### Root `.env`
-The root `.env` is used across the project.
+The root `.env` is highly critical and is explicitly required by Expo to start the Chatbot. 
 Current important variables are:
 
-- `GROQ_API_KEY`
-- `EXPO_PUBLIC_API_BASE_URL`
-- `EXPO_PUBLIC_GEMINI_API_KEY` (if configured for the coach)
+- `GROQ_API_KEY` (Used by backend FastAPI parser)
+- `EXPO_PUBLIC_API_BASE_URL` (Used by Expo to reach backend)
+- `EXPO_PUBLIC_GEMINI_API_KEY` (Required for the `app/coach.js` AI chatbot to answer questions dynamically)
 
 ### `.env.example`
 This file shows the expected variable names without real secrets.
@@ -549,9 +553,10 @@ If this project continues beyond the hackathon, the most useful cleanup tasks wo
 If you only want to know where the current product logic really lives, start here:
 
 - frontend entry/layout: `app/_layout.js`
-- onboarding: `app/index.js`
-- upload flow: `app/swipe.js`
-- insights page: `app/dashboard.js`
+- onboarding/setup: `app/index.js`
+- value props: `app/interstitial.js`
+- upload vault: `app/swipe.js`
+- insights dashboard: `app/dashboard.js`
 - coach: `app/coach.js`
 - app state: `context/AppContext.js`
 - upload API client: `utils/documentApi.js`

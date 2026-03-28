@@ -18,3 +18,9 @@ backend/**/*.pyc
 Thumbs.db
 .vscode/
 .idea/
+
+# Custom Exclusions
+*.pdf
+notes.txt
+estimate_tokens.py
+/.venv/
