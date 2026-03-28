@@ -33,6 +33,17 @@ export function AppProvider({ children }) {
   const [swipedTotals, setSwipedTotals] = useState(createDefaultSwipedTotals);
   const [documentResults, setDocumentResultsState] = useState([]);
 
+  // ── TOOL 3: Money Health Score inputs ──
+  const [healthInputs, setHealthInputsState] = useState({
+    emergencyFund: 0,
+    healthInsuranceCover: 0,
+    termLifeCover: 0,
+    hasDependents: false,
+    totalMonthlyEMI: 0,
+    hasRevolvingCCDebt: false,
+    monthlyRetirementSaving: 0,
+  });
+
   const setIncome = useCallback((value) => {
     const nextIncome = sanitizeNumber(value, 0);
 
@@ -57,6 +68,10 @@ export function AppProvider({ children }) {
     setRiskVibeState(value || "Balanced");
   }, []);
 
+  const setHealthInputs = useCallback((updates) => {
+    setHealthInputsState((current) => ({ ...current, ...updates }));
+  }, []);
+
   const saveOnboarding = useCallback(
     (payload = {}) => {
       const nextIncome = sanitizeNumber(payload.income ?? income, income);
@@ -70,6 +85,10 @@ export function AppProvider({ children }) {
       setNeedsSliderAmountState(nextNeeds);
       setPrimaryGoalState(payload.primaryGoal || primaryGoal);
       setRiskVibeState(payload.riskVibe || riskVibe);
+
+      if (payload.healthInputs) {
+        setHealthInputsState((current) => ({ ...current, ...payload.healthInputs }));
+      }
     },
     [income, needsSliderAmount, primaryGoal, riskVibe],
   );
@@ -143,12 +162,14 @@ export function AppProvider({ children }) {
       riskVibe,
       swipedTotals,
       documentResults,
+      healthInputs,
       topLeak,
       totalSwipedAmount,
       setIncome,
       setNeedsSliderAmount,
       setPrimaryGoal,
       setRiskVibe,
+      setHealthInputs,
       saveOnboarding,
       resetSwipedTotals,
       addSwipeToCategory,
@@ -163,12 +184,14 @@ export function AppProvider({ children }) {
       riskVibe,
       swipedTotals,
       documentResults,
+      healthInputs,
       topLeak,
       totalSwipedAmount,
       setIncome,
       setNeedsSliderAmount,
       setPrimaryGoal,
       setRiskVibe,
+      setHealthInputs,
       saveOnboarding,
       resetSwipedTotals,
       addSwipeToCategory,

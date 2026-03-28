@@ -1,0 +1,359 @@
+STITCH PROMPT — "FinBuddy" Financial Health Onboarding App
+===========================================================
+
+Build a complete, fully interactive 9-screen financial health onboarding web app as a single React component. The app features a cute 2D mascot avatar (described below) that guides the user through each step conversationally, making the experience feel like chatting with a friendly companion — not filling out a boring form.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧸 MASCOT AVATAR — "Bubbles" (Azurill-Inspired 2D Character)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Design a cute 2D SVG mascot rendered inline (NOT an image). It should feel like Azurill from Pokémon — round, bouncy, expressive, and lovable.
+
+Shape & Body:
+- A round, soft, slightly squished circle body (like a water droplet or mochi ball)
+- Pastel mint-teal (#7ECEC1) as the primary body color with a lighter belly patch (#B8F0E8)
+- Tiny stubby arms/flippers on the sides (no legs — it floats/bounces)
+- A small, bouncy tail that curls like a spring or has a little gold coin ✦ on the tip (financial theme)
+
+Face & Expression:
+- Big, sparkly oval eyes with white highlights (think Kirby or Azurill eyes) — expressive and animated
+- A tiny "w"-shaped mouth or a small open smile
+- Subtle pink blush circles on cheeks (#FFB4C2)
+- Eyes should ANIMATE: blink every few seconds, look toward the current input field, widen with excitement on score reveal
+
+Accessories (Financial Theme):
+- A tiny golden crown or a small floating coin halo above its head
+- Optional: a miniature chart/graph pattern on its belly instead of plain color
+
+Animations (CSS keyframes):
+- Idle: gentle up-down float/bob (2s ease-in-out infinite)
+- Talking: slight squish-stretch when displaying a new speech bubble (scale 0.95 → 1.05 → 1.0)
+- Celebrating: jumps up with sparkle particles on score reveal screen
+- Thinking: tilts side to side during the "analyzing" loading screen
+- Sad: droops slightly if health score is low
+
+Speech Bubble:
+- The avatar has a rounded speech bubble (16px radius, soft shadow) positioned to its right or above
+- The bubble contains the conversational question text
+- Text appears with a typewriter animation (letter by letter, 30ms per char)
+- The bubble has a small triangular pointer toward the avatar
+
+Positioning:
+- Avatar sits in the upper-left or upper portion of each screen
+- Size: roughly 80–100px wide on mobile, 120px on desktop
+- It should feel "present" on every screen but never obstruct the main interaction area
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎨 DESIGN SYSTEM & VISUAL LANGUAGE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PSYCHOLOGY: The app should feel like a cozy, supportive wellness experience — not a cold fintech dashboard. Think "Headspace meets your best friend who's good with money." Every interaction should trigger a micro-reward.
+
+COLOR PALETTE:
+- Background: Deep charcoal #1A1A2E (primary), with subtle gradient to #16213E
+- Card surfaces: #242442 with 1px border of rgba(255,255,255,0.06)
+- Primary accent: Warm gold #E8B86D (CTAs, highlights, progress, coin motifs)
+- Secondary accent: Soft teal #7ECEC1 (avatar, healthy indicators, success states)
+- Healthy/Good: #4ADE80 (green)
+- Warning: #FBBF24 (amber)
+- Risk/Alert: #F87171 (coral red)
+- Text primary: #F1F1F1
+- Text secondary: #A0A0B8
+- Text on accent: #1A1A2E
+
+TYPOGRAPHY:
+- Display/Headers: "Fraunces" (Google Font) — variable weight, optical size. Warm, friendly serif with personality. Used for score numbers, screen titles, and the avatar's speech text.
+- Body/UI: "DM Sans" (Google Font) — clean, modern, geometric sans. Used for labels, descriptions, buttons.
+- Score numbers: Fraunces at 64–80px, weight 700, with tabular-nums for animated counting.
+
+SPACING & LAYOUT:
+- All screens are single-column, vertically centered, max-width 440px (mobile-first)
+- Card border-radius: 20px
+- Button border-radius: 14px
+- Generous padding: 24–32px inside cards
+- Screen transitions: horizontal slide (200ms ease-out) or gentle fade-scale
+
+MICRO-INTERACTIONS (Critical for "feel"):
+- All buttons: scale(0.97) on press, spring back
+- Card selection: selected card gets gold border glow + slight lift (translateY -2px + box-shadow)
+- Sliders: custom styled — gold track, large round thumb with inner glow
+- Progress bar: smooth width transition (400ms cubic-bezier), with a subtle shimmer/shine animation on the filled portion
+- Number changes: count-up animation using requestAnimationFrame
+- Screen enter: content staggers in from below (opacity 0→1, translateY 20→0, 60ms delay per element)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📱 SCREEN-BY-SCREEN FLOW (9 Screens)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+GLOBAL UI ELEMENTS (present on screens 2–8):
+- Top: thin progress bar (4px, gold fill, full viewport width)
+- Avatar "Bubbles" with speech bubble containing the question
+- Bottom: large CTA button ("Continue" / "Next" / contextual label)
+- Subtle step indicator dots below progress bar
+
+─────────────────────────────────────────────────────────
+SCREEN 1 — WELCOME ("The Hook")
+Pattern: Duolingo — engage before asking anything
+─────────────────────────────────────────────────────────
+
+Layout:
+- Full dark background with a subtle radial gradient glow (gold, very faint) behind the avatar
+- Avatar "Bubbles" is large here (160px), centered, doing its idle bounce animation
+- Below avatar: App name "FinBuddy" in Fraunces, 36px, gold color
+- Tagline: "Your cute companion for money wellness ✨" in DM Sans, 16px, secondary text color
+- A few floating golden coin/sparkle particles drifting slowly in background (CSS animated)
+- Large CTA button: "Let's Go!" — gold background, dark text, full width, with a gentle pulse animation (box-shadow expanding/contracting)
+
+Avatar behavior: Bubbles waves one flipper, eyes are extra sparkly
+
+No form fields. No sign-up. Pure emotional hook.
+
+─────────────────────────────────────────────────────────
+SCREEN 2 — MONTHLY INCOME (Slider Input)
+Pattern: Noom — one concept, full screen
+─────────────────────────────────────────────────────────
+
+Avatar speech: "First things first! 💰 How much do you earn each month?"
+
+Main interaction:
+- Large center number displaying current value: "₹50,000" in Fraunces, 48px, gold
+- Below: custom range slider (min ₹10,000 → max ₹5,00,000, step ₹1,000)
+  - Track: dark with gold filled portion
+  - Thumb: 28px circle, gold, with subtle inner shadow
+- As user drags, the number updates in real-time with a slight scale pulse
+
+Avatar behavior: Eyes follow the slider thumb position (look left when low, right when high). If income is high, eyes go wide with sparkle effect.
+
+Quick-select pills below slider: "₹25K" "₹50K" "₹1L" "₹2L" — tapping snaps slider
+
+─────────────────────────────────────────────────────────
+SCREEN 3 — MONTHLY NEEDS + LIVE INSIGHT (The "Aha" Moment)
+Pattern: YNAB — instant ratio feedback
+─────────────────────────────────────────────────────────
+
+Avatar speech: "Now, how much goes to essentials? Rent, food, bills... 🏠"
+
+Main interaction:
+- Same slider UI as Screen 2 for expenses amount
+- BELOW the slider: animated circular ring/donut chart showing the ratio:
+  - Ring fills based on (expenses / income) percentage
+  - Color-coded: green (<50%), amber (50–70%), red (>70%)
+  - Center of ring: percentage number + label
+    - "48% — Healthy! 🎉"
+    - "65% — Getting tight 😬"
+    - "78% — Risky zone 🚨"
+  - Ring animates smoothly as slider moves
+
+Avatar behavior: Expression changes based on ratio — happy (green), concerned (amber), worried (red). This is the KEY emotional feedback moment.
+
+This is the most important UX screen. The live ring + avatar reaction = instant value delivered.
+
+─────────────────────────────────────────────────────────
+SCREEN 4 — FINANCIAL GOAL (Card Selection)
+Pattern: Hinge/Tinder — big tappable cards
+─────────────────────────────────────────────────────────
+
+Avatar speech: "What's your money mission right now? Pick one! 🎯"
+
+Main interaction:
+- 3 large cards stacked vertically, each 100% width:
+  1. 🛡️ "Stay Safe" — "Build a safety net for peace of mind"
+     - Subtle teal tint on background
+  2. 🌱 "Build Wealth" — "Grow your money and invest smarter"
+     - Subtle green tint
+  3. 🔥 "Destroy Debt" — "Crush loans and breathe free"
+     - Subtle warm orange tint
+- Each card: 72px tall, icon on left (32px emoji), title in Fraunces 20px, subtitle in DM Sans 13px
+- Tap: selected card gets gold border, slight scale-up (1.02), checkmark appears, other cards dim slightly (opacity 0.5)
+- Only one selectable at a time
+
+Avatar behavior: Bubbles nods enthusiastically when a card is tapped, does a little bounce
+
+─────────────────────────────────────────────────────────
+SCREEN 5 — RISK PERSONALITY (Horizontal Card Select)
+Pattern: 16Personalities — personality quiz feel
+─────────────────────────────────────────────────────────
+
+Avatar speech: "How do you feel about financial risk? Be honest! 😄"
+
+Main interaction:
+- 3 cards in a horizontal row (or stacked on very small screens):
+  1. 🐢 "Play Safe" — green-tinted card
+  2. ⚖️ "Balanced" — blue-tinted card  
+  3. 🚀 "YOLO" — red/orange-tinted card
+- Cards are square-ish (120x140px each), with large emoji on top, label below
+- Selection: gold border + glow, unselected cards shrink slightly (scale 0.95)
+- Background color subtly shifts based on selection (green wash for safe, warm for YOLO)
+
+Avatar behavior: For "Play Safe" — Bubbles puts on a tiny hard hat. For "YOLO" — Bubbles' eyes turn to star shapes. For "Balanced" — Bubbles gives a thumbs up with flipper.
+
+─────────────────────────────────────────────────────────
+SCREEN 6 — QUICK FLAGS (Pill Toggles)
+Pattern: Wysa — pill toggles, zero friction
+─────────────────────────────────────────────────────────
+
+Avatar speech: "Almost there! Just a couple quick ones... 📋"
+
+Main interaction:
+- Two simple yes/no questions, each as a row:
+  1. "Do you have dependents?"  →  [YES] [NO] pill buttons
+  2. "Any credit card debt?"   →  [YES] [NO] pill buttons
+- Pill buttons: rounded-full (999px radius), 48px tall, side by side
+  - Unselected: dark surface, secondary text
+  - Selected: gold background, dark text, subtle scale
+- Optional collapsed accordion below: "+ Add more details for better accuracy"
+  - If expanded: mini sliders for Emergency Fund, Insurance, EMIs, Retirement savings
+  - Each has a small icon and compact slider
+
+Avatar behavior: Bubbles taps its flipper like it's checking off a clipboard
+
+─────────────────────────────────────────────────────────
+SCREEN 7 — ANALYZING (Fake Intelligent Loader)
+Pattern: Noom — "fake loader" that builds anticipation
+─────────────────────────────────────────────────────────
+
+Avatar speech: (Changes with each step — see below)
+
+NO user interaction on this screen. It's a 6-second automated sequence:
+
+Step 1 (0–2s):
+  - Avatar speech: "Crunching your numbers... 🔢"
+  - Show: "📊 Analyzing income patterns..." with animated dots
+  - A subtle progress ring fills to 33%
+
+Step 2 (2–4s):
+  - Avatar speech: "Ooh, interesting... 🤔"
+  - Show: "🧠 Calculating your financial personality..."
+  - Progress ring fills to 66%
+
+Step 3 (4–6s):
+  - Avatar speech: "Your results are ready! 🎉"
+  - Show: "✨ Generating your Money Health Score..."
+  - Progress ring fills to 100%
+
+Visual feel:
+- Each step fades in/out smoothly
+- The background has slowly drifting particles
+- Avatar tilts side to side (thinking animation)
+- After completion, auto-advances to Screen 8
+
+This screen is pure psychology. It makes the app feel intelligent and the results feel earned.
+
+─────────────────────────────────────────────────────────
+SCREEN 8 — SCORE REVEAL (The Payoff)
+Pattern: Animated reveal with dimensional breakdown
+─────────────────────────────────────────────────────────
+
+Avatar speech: "Here's your Money Health Score! 🏆" (Bubbles is jumping/celebrating)
+
+Main content:
+
+HERO SCORE:
+- Large circular progress ring (200px), gold stroke
+- Ring animates from 0 to final score over 2 seconds (e.g., 0 → 72)
+- Center: score number counting up in Fraunces 64px + "/100"
+- Below ring: Grade badge — "Grade B" in a pill shape
+- Below grade: contextual message "You're doing okay, but there's room to grow! 💪"
+
+SIX HEALTH DIMENSION CARDS (horizontal scroll or 2x3 grid):
+- Each card: icon + dimension name + mini score + color dot
+  1. 🏦 Emergency — 45 🟡
+  2. 🛡️ Insurance — 30 🔴
+  3. 📈 Investments — 78 🟢
+  4. 💳 Debt — 60 🟡
+  5. 📋 Tax — 55 🟡
+  6. 🏖️ Retirement — 40 🔴
+- Each card is compact (full width, 56px tall), with score bar filling proportionally
+
+CTA: "View Full Dashboard →" — large gold button
+
+Avatar behavior: Bubbles does a celebration jump with confetti particles bursting around it (CSS animated sparkles/circles). If score is low, Bubbles gives a supportive expression with a speech bubble: "Don't worry, I'll help you improve! 💕"
+
+─────────────────────────────────────────────────────────
+SCREEN 9 — FULL DASHBOARD (The Intelligence Layer)
+Pattern: INDMoney — comprehensive but not overwhelming
+─────────────────────────────────────────────────────────
+
+Avatar: Bubbles is smaller here (60px), positioned as a floating action button in bottom-right. Tap opens AI Coach chat modal.
+
+Dashboard sections (scrollable, staggered reveal animation):
+
+SECTION 1 — Hero Score (compact version)
+- Score ring (smaller, 120px) + grade + one-line message
+- "Improve Score" ghost button
+
+SECTION 2 — Health Alerts (most important, shown first after hero)
+- Red/amber alert cards:
+  - "⚠️ No term insurance detected"
+  - "⚠️ Emergency fund below 3 months"
+  - "⚠️ High expense ratio (65%)"
+- Each alert has a "Fix This →" text button in gold
+
+SECTION 3 — Cashflow Overview
+- Three stat boxes in a row: Income | Expenses | Savings (with amounts)
+- Below: simple donut chart showing Fixed vs Discretionary split
+- Below donut: "Savings Rate: 22%" with color indicator
+
+SECTION 4 — Health Dimensions (expanded)
+- 6 cards in a 2-column grid, each showing:
+  - Icon + name
+  - Score bar (colored fill)
+  - Score number
+  - Tap to expand for detail (accordion)
+
+SECTION 5 — Document Status
+- Card: "📄 No documents uploaded yet"
+- CTA: "Upload for better accuracy →"
+- (If uploaded: shows list of files with ✅ checkmarks)
+
+SECTION 6 — AI Coach (Floating Button)
+- Gold FAB in bottom-right with 💬 icon
+- Tap opens full-screen modal:
+  - Chat interface with Bubbles avatar
+  - Pre-filled suggestion chips: "How can I improve?", "Am I saving enough?", "Where do I overspend?"
+  - Simple chat UI: user messages right-aligned (gold), AI messages left-aligned (surface color) with Bubbles mini avatar
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚙️ TECHNICAL REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+- Single React component with useState for all state management
+- Use Tailwind utility classes for layout/spacing
+- Custom CSS (in <style> tag or inline) for animations, gradients, and the avatar SVG
+- Google Fonts: import Fraunces (variable) and DM Sans
+- NO external images — avatar and all icons are pure SVG/emoji
+- NO localStorage or sessionStorage
+- All animations via CSS @keyframes or requestAnimationFrame
+- Mobile-first: 100vw, 100vh, centered content, max-width 440px
+- Smooth transitions between screens using React state + CSS transitions
+- The progress bar should reflect: currentScreen / totalScreens
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧠 UX PSYCHOLOGY CHECKLIST (Non-Negotiable)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ ONE concept per screen — never combine multiple inputs
+✅ Value delivered IMMEDIATELY after input (ratio ring, avatar reaction)
+✅ Zero typing required until AI Coach chat — all taps, slides, selects
+✅ Avatar provides emotional continuity across all screens
+✅ Progress bar creates momentum and completion drive
+✅ The "analyzing" fake loader makes results feel earned and intelligent
+✅ Score reveal has animation + celebration = dopamine hit
+✅ Dashboard alerts create urgency without overwhelming
+✅ AI Coach is always accessible but never forced
+✅ Conversational micro-copy everywhere — no "Enter Monthly Income", instead "How much do you earn?"
+✅ Skip options where appropriate — no forced fields
+✅ Dark theme with warm gold = premium, trustworthy, cozy
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎯 THE FEEL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+When a user goes through this app, they should feel:
+→ "This was actually fun"
+→ "This little character understands me"
+→ "I got real value without any effort"
+→ "I want to come back and improve my score"
+→ "This doesn't feel like a finance app at all"
+
+The avatar "Bubbles" is the soul of the app. It transforms a financial questionnaire into a conversation with a caring, cute companion. Every screen should feel like Bubbles is right there with you, reacting to your choices, celebrating your wins, and gently nudging you to do better.
