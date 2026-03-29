@@ -26,39 +26,56 @@ The platform consists of three primary services:
 - Node.js v18+
 - Python 3.11+
 - Tesseract OCR (optional, for OCR fallback)
+- PostgreSQL (e.g., `postgresql@14` via Homebrew)
 - Google Gemini API Key
 
-### **1. Environment Configuration**
-Copy `.env.example` to `.env` in the root and configure the following:
-- `GEMINI_API_KEY`: Your Google AI Studio key.
-- `ENGINE_SERVICE_URL`: Typically `http://localhost:3000`.
-- `DATABASE_URL`: A PostgreSQL or local SQLite URL.
-
-### **2. Service Installation**
-
+### **1. Setup the Database (PostgreSQL)**
+Create the required database for this project (running Postgres locally):
 ```bash
-# Install root and workspace dependencies
-npm install
-npm --workspace frontend install
-npm --workspace engine-service install
-
-# Install backend dependencies
-cd backend
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -e .[dev]
+createdb finguard
 ```
 
-### **3. Running the Services**
+### **2. Setup the Javascript Workspaces**
+This project uses NPM Workspaces. You can install all frontend and engine dependencies simply from the root directory:
+```bash
+npm install
+```
+
+### **3. Setup the Python Backend**
+Create a virtual environment, install dependencies, and run database schema migrations:
+```bash
+cd backend
+
+# Create and activate environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Install all backend packages (including Alembic, FastAPI, etc.)
+pip install -e ".[dev]"
+
+# Create your fresh .env file for the backend
+echo 'GEMINI_API_KEY="your_api_key_here"' > .env
+echo 'DATABASE_URL="postgresql+psycopg://localhost:5432/finguard"' >> .env
+
+# Run Alembic to generate your database tables from scratch
+alembic upgrade head
+
+# Return to root directory
+cd ..
+```
+
+### **4. Running the Services**
+You must run these three services simultaneously from the root folder. You can use three separate terminal windows:
 
 ```bash
-# Start the Engine Service (Port 3000)
-npm run dev:engine
-
-# Start the Backend Service (Port 8000)
+# Terminal 1: Start the Backend API (requires activated venv)
+source backend/.venv/bin/activate
 npm run dev:backend
 
-# Start the Frontend (Expo)
+# Terminal 2: Start the Engine Microservice
+npm run dev:engine
+
+# Terminal 3: Start the Frontend (Expo)
 npm run dev:frontend
 ```
 
