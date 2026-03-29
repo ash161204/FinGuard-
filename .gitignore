@@ -1,0 +1,26 @@
+node_modules/
+.expo/
+.expo-shared/
+dist/
+build/
+coverage/
+.DS_Store
+*.log
+
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+*.pyc
+*.egg-info/
+
+# Global environment variables
+.env
+.env.*
+!.env.example
+
+# Storage and uploads (handles nested structure issues)
+**/storage/
+**/uploads/
+tmp/

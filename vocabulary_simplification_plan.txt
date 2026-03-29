@@ -1,0 +1,51 @@
+FinGuard Vocabulary Simplification Plan
+
+**1. GENERAL TERMINOLOGY**
+- "Corpus" -> "Total Savings" or "Nest Egg"
+- "XIRR" -> "Average Annual Return"
+- "EMI" -> "Monthly Loan Payments"
+- "SIP" -> "Regular Monthly Investment"
+- "Regime" -> "Tax System" (e.g., "Old vs New Tax System")
+- "Extraction" -> "Reading your document"
+- "Normalization" -> "Cleaning up data"
+
+**2. HOME SCREEN (PULSE)**
+- "Money Health Score" -> "Financial Fitness Score"
+- "Insights" -> "Smart Tips" or "Suggestions"
+- "Actions" -> "To-Do List"
+- "Inferred Actions" -> "Automated Recommendations"
+
+**3. TAX WIZARD (FORM 16)**
+- "Section 80C/80D" -> "Tax-Saving Investments" and "Health Insurance Tax Break"
+- "HRA received" -> "House Rent Allowance"
+- "LTA" -> "Travel Allowance"
+- "Tax Payable" -> "Total Tax You Owe"
+- "Refund / Payable" -> "Final Tax Balance (Refund if negative)"
+- "Professional Tax" -> "Employment Tax"
+
+**4. MUTUAL FUND X-RAY (CAMS)**
+- "Portfolio XIRR" -> "Your Overall Growth Rate"
+- "Risk Profile" -> "Investment Risk Level"
+- "Portfolio Hygiene" -> "Account Health Checks"
+- "Rebalancing" -> "Adjusting your investment mix"
+- "Holdings" -> "Your Investments"
+- "Direct/Regular Plan" -> "Low-fee (Direct) vs Commission-based (Regular)"
+
+**5. FIRE PLANNER**
+- "FIRE Planner" -> "Early Retirement Planner"
+- "Current Corpus" -> "Current Total Savings"
+- "Required Corpus" -> "Goal Savings for Retirement"
+- "Projected Corpus" -> "Estimated Savings at Retirement"
+- "Inflation" -> "Cost of Living Increase"
+- "Return Rate" -> "Expected Growth Rate"
+- "Gap" -> "Shortfall" or "Remaining to Goal"
+
+**6. PROFILE & INPUTS**
+- "Monthly Cash Flow" -> "Monthly Money In & Out"
+- "Emergency Fund" -> "Rainy Day Fund"
+- "Term Life Cover" -> "Life Insurance Amount"
+- "Health Insurance Cover" -> "Medical Insurance Amount"
+
+**7. USER EXPLANATIONS (TOOLTIPS/HELPERS)**
+- Instead of "Express as decimal (0.12)", use "Enter percentage (e.g., 12%)" and handle the math in the background.
+- Add "Why this matters?" small text for complex fields like 80CCD1B (NPS).

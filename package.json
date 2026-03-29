@@ -1,0 +1,24 @@
+{
+  "name": "finguard",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "frontend",
+    "engine-service"
+  ],
+  "scripts": {
+    "dev:frontend": "npm --workspace frontend run start",
+    "dev:engine": "npm --workspace engine-service run dev",
+    "dev:backend": "python3 -m uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port 8000 --reload",
+    "lint:frontend": "npm --workspace frontend run lint",
+    "lint:engine": "npm --workspace engine-service run lint",
+    "test:frontend": "npm --workspace frontend run test",
+    "test:engine": "npm --workspace engine-service run test",
+    "test:backend": "python3 -m pytest backend/tests",
+    "format:check": "npx prettier --check .",
+    "format:write": "npx prettier --write ."
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2"
+  }
+}

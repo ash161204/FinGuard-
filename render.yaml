@@ -1,0 +1,48 @@
+services:
+  # 1. Node.js Engine Service
+  - type: web
+    name: finguard-engine
+    env: node
+    rootDir: engine-service
+    buildCommand: npm install && npm run build
+    startCommand: node dist/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+
+  # 2. FastAPI Backend Service
+  - type: web
+    name: finguard-backend
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port 10000
+    plan: starter
+    disk:
+      name: finguard-uploads
+      mountPath: /data/uploads
+      sizeGB: 1
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: finguard-db
+          property: connectionString
+      - key: ENGINE_SERVICE_URL
+        fromService:
+          type: web
+          name: finguard-engine
+          property: host
+      - key: UPLOAD_PATH
+        value: /data/uploads
+      - key: GEMINI_API_KEY
+        sync: false # User must set this in Render UI
+      - key: DEMO_USER_ID
+        value: "00000000-0000-0000-0000-000000000001"
+
+databases:
+  - name: finguard-db
+    plan: free

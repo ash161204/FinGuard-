@@ -1,0 +1,58 @@
+FinGuard UI Shift Plan: Modern Card-Based Design (Detailed)
+
+**1. REFINED THEME & TOKENS**
+- Backgrounds: Change `palette.canvas` from '#f4efe6' to '#F5F7FF' (Light Lavender White). Change `palette.surface` to '#FFFFFF'.
+- Primary Brand: Change `palette.accent` from '#124734' (Dark Green) to '#2D60FF' (Vibrant Royal Blue).
+- Header Gradient: Introduce a linear gradient for top sections: '#2D60FF' to '#537FFF'.
+- Shadows: Replace `border` and `borderStrong` with a unified soft shadow: `shadowColor: '#1A1C1E', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.05, shadowRadius: 20, elevation: 5`.
+- Border Radius:
+  - Cards: 25px
+  - Buttons/Inputs: 12px
+  - Icons Containers: 15px
+
+**2. LAYOUT & SCAFFOLDING**
+- Top Header Area: Every screen will feature a "Top Section" that spans the upper 30% of the screen.
+  - On 'Home', this section is solid Royal Blue with the user profile and notification bell at the top.
+  - On 'Feature' screens (Tax, MF, FIRE), this section holds the primary summary metric.
+- Content Area: The remaining 70% of the screen will have a light background ('#F5F7FF') with cards that overlap the header slightly (-20px margin-top).
+
+**3. COMPONENT-LEVEL TRANSFORMATION**
+- 'PulseCard' (HomeScreen):
+  - Current: Flat green box.
+  - New: A "Virtual Card" design. Dimensions 300x180, rounded 25px. Background is a soft purple/blue gradient.
+  - Content: Large bold "Money Health Score" (A-F) in the center. Subtext "Health Level" above it. Small "VISA style" chip icon in the top left for aesthetic flair.
+- 'InsightItem' (Tax/MF/Home):
+  - Current: Bordered list items.
+  - New: Elevated white cards.
+  - Left Icon: A 45x45px square with 15px radius. Light blue background (#E7EDFF). Central icon in dark blue (#2D60FF).
+  - Center Text: Bold Title (16px), regular Subtitle (13px, grey).
+  - Right Text: Large Bold Currency/Value (15px), "Pill-style" Status Badge below it (e.g., 'Confirmed' in green, 'Pending' in orange).
+
+**4. SCREEN-SPECIFIC SHIFTS**
+
+- **Home Screen (Pulse)**:
+  - Header: John Smith profile (top left), Notification (top right).
+  - Middle: Horizontal scrollable "Quick Actions" (Transfer -> Upload, Add Template -> Refresh). Buttons are dark blue rectangles with rounded corners.
+  - Bottom: "Recent transactions" renamed to "Top Insights & Actions". Elevated cards as described in Section 3.
+
+- **Tax & MF Screens**:
+  - Header: Large centered "Total Tax Gap" or "Portfolio Value" in white text on the blue background.
+  - Reports: Grouped into "Detailed Analysis" cards. Each card uses the 25px radius and soft shadow.
+
+- **FIRE Planner**:
+  - Inputs: Placed inside a "Settings Card" at the top with clear labels. Labels use the new font contrast (grey label, bold black value).
+  - Graph: Transparent background, using the Royal Blue for the main trend line and a light blue fill area beneath it.
+
+- **Profile Screen**:
+  - User ID: Displayed in the "VISA card" format at the top.
+  - Form Fields: Floating label style. Soft grey background for inputs with no borders, only a 12px radius.
+
+- **Upload & Review**:
+  - Job Progress: Displayed as a "Processing Card" in the transactions list. Once done, it turns into a "Success Card" with a "View Analysis" action button.
+  - Review Form: Uses the high-contrast typography. Each editable field is a card with a subtle shadow.
+
+**5. NAVIGATION (AppTabs)**
+- Height: 90px (slightly taller for modern feel).
+- Icons: Use the minimal line icons from the image.
+- Active State: Icon turns Royal Blue; a small dot appears below the active icon.
+- Background: Solid white with 20px top-radius.

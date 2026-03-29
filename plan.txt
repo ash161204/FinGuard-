@@ -1,0 +1,212 @@
+Execution Plan
+
+This plan assumes:
+
+single demo user
+FastAPI BackgroundTasks for v1 jobs
+local-disk uploads
+separate Node HTTP engine service
+manual correction for extracted Form 16 and CAMS data before analysis
+Milestone 0: Architecture Freeze
+Scope: lock contracts, folder structure, service boundaries, and v1 non-goals.
+Deliverables: shared API spec, canonical JSON schemas, repo layout, env var list, sequence diagram, decision log.
+Exit criteria: endpoints, job states, engine request/response shape, Form 16 tier rules, and score/FIRE input contracts are frozen.
+
+Milestone 1: Repo Scaffolding
+Scope: create the project skeleton for frontend, backend, engine-service, and docs.
+Deliverables: Expo app booting, FastAPI app booting, Node service booting, lint/test/prettier setup, base README, .env.example.
+Exit criteria: all three services run locally and basic health endpoints respond.
+
+Milestone 2: Engine Service Integration
+Scope: wrap insightEngine.js behind a stable Node microservice.
+Deliverables: POST /run-engine, typed request modes for tax, mf, score, input validation, error handling, fixture tests.
+Exit criteria: backend can call the Node service and receive deterministic JSON for sample tax and MF payloads.
+
+Milestone 3: Engine Contract Patching
+Scope: patch engine outputs so downstream services do not need brittle hacks.
+Deliverables: canonical tax output fields for scoring, canonical MF allocation fields, overlap field alignment, monthly-income naming fixes, removal of bank-analysis exposure.
+Exit criteria: score service can consume tax and MF outputs without special-case field remapping.
+
+Milestone 4: Backend Core and Database
+Scope: build the FastAPI foundation and persistence layer.
+Deliverables: SQLAlchemy models, Alembic migrations, repositories, demo-user bootstrap, tables for profiles, extracted data, normalized data, derived data, actions, score history, and jobs.
+Exit criteria: database migrates cleanly and CRUD flows work for the demo user.
+
+Milestone 5: Upload and Job System
+Scope: support PDF upload, local storage, job creation, and polling.
+Deliverables: /upload/form16, /upload/cams, GET /job/{job_id}, job state transitions, upload validation, file path management, structured job errors.
+Exit criteria: uploaded files are persisted locally, jobs progress through pending -> processing -> completed/failed, and the frontend can poll status.
+
+Milestone 6: Extraction Pipeline
+Scope: implement text extraction, OCR fallback, Gemini structuring, and validation.
+Deliverables: PDF text extractor, Tesseract OCR path, cleaned text preprocessing, regex helpers, Gemini function-calling client, PII stripping, strict schema validation, retry-once logic.
+Exit criteria: Form 16 and CAMS sample PDFs produce validated extracted JSON with null for unknown values and a missing-fields list.
+
+Milestone 7: Tiered Form 16 and CAMS Review Flow
+Scope: enforce the tier model and support user correction before analysis.
+Deliverables: Form 16 Level 1/2/3 schema handling, critical-field blocker logic, editable extraction payload API, persistence of reviewed values, CAMS correction support.
+Exit criteria: Tax Wizard blocks only when Level 1 is missing, optional fields do not block, and corrected values can be saved and reused.
+
+Milestone 8: Normalization Layer
+Scope: convert extracted/reviewed payloads into engine-ready canonical JSON.
+Deliverables: field-map config, number/date normalization, source merge rules, null-safe transforms, normalization tests, persisted normalized profile records.
+Exit criteria: both Form 16 and CAMS reviewed inputs normalize consistently into engine-compatible payloads.
+
+Milestone 9: Analysis APIs
+Scope: implement deterministic backend flows for Tax and MF analysis.
+Deliverables: /analyze/tax, /analyze/mf, backend adapters for engine output, top-insight ranking, UI-friendly insight transformation, persistence in derived_data.
+Exit criteria: both endpoints return summary, top_insights, and full_report from fixture inputs, including partial-analysis behavior.
+
+Milestone 10: Score and FIRE APIs
+Scope: implement Money Health Score and FIRE planner.
+Deliverables: /score, /fire, monthly-income-based score input handling, FIRE formulas, yearly plan generation, corpus estimation, score history persistence.
+Exit criteria: score and FIRE return stable outputs from known fixtures, and score changes are written to history.
+
+Milestone 11: Action Tracking
+Scope: build inferred and manual action management.
+Deliverables: action creation from ranked insights, status/progress updates, top-3 home feed, backend persistence, action APIs.
+Exit criteria: Home can show top actions and users can update progress/status.
+
+Milestone 12: Frontend App Shell
+Scope: implement navigation, state, API integration, and app-wide infra.
+Deliverables: stack/tab navigation, Zustand store, React Query client, AsyncStorage cache, API client, loading/error primitives, theme tokens.
+Exit criteria: the app navigates end-to-end and loads mock/real backend data.
+
+Milestone 13: Upload and Review UX
+Scope: build the upload, polling, review, and retry flows.
+Deliverables: Upload screen, job polling UI, extraction review forms, missing-field prompts, retry states, blocked-state messaging, partial-analysis messaging.
+Exit criteria: user can upload, wait for extraction, correct fields, and trigger analysis without leaving the app.
+
+Milestone 14: Feature Screens
+Scope: build the user-facing Tax, MF, FIRE, Home, and Profile experiences.
+Deliverables: Home score card, trend graph, top 3 actions, Tax summary/detail screens, MF summary/detail screens, FIRE planner screen, profile editor.
+Exit criteria: all main screens render real data and support empty, partial, and success states.
+
+Milestone 15: Caching and Data Invalidation
+Scope: make the app resilient and consistent.
+Deliverables: React Query cache keys, invalidation on edits/uploads/profile changes, AsyncStorage hydration, optimistic UI only where safe.
+Exit criteria: changing source data invalidates dependent reports and stale outputs are not shown.
+
+Milestone 16: Testing and Fixtures
+Scope: harden the system before deployment.
+Deliverables: unit tests for normalization/ranking/FIRE math, engine adapter tests, backend integration tests, sample Form 16 and CAMS fixtures, frontend smoke tests.
+Exit criteria: core paths are covered and fixture outputs are reproducible.
+
+Milestone 17: Documentation and Deployment
+Scope: finish developer docs and ship v1 to Render.
+Deliverables: full README, architecture diagram, setup guide, API docs, limitations section, Render configs for backend and engine service, env setup instructions.
+Exit criteria: both services deploy successfully to Render, environment configuration is documented, and the v1 demo flow works in deployed form.
+
+
+Sprint 1
+Goal: freeze architecture and get all services bootstrapped.
+
+FG-001 Write the v1 architecture decision record covering demo user, Node engine service, BackgroundTasks, local disk storage, and Render deployment.
+FG-002 Define canonical request/response schemas for extraction, normalization, tax, MF, score, FIRE, jobs, actions, and API errors.
+FG-003 Create repo structure for frontend, backend, engine-service, and docs.
+FG-004 Bootstrap Expo app with navigation, React Query, Zustand, AsyncStorage, env handling, and lint/test setup.
+FG-005 Bootstrap FastAPI app with settings, logging, health route, route modules, and lint/test setup.
+FG-006 Bootstrap Node engine service with Express or Fastify, health route, request validation, and lint/test setup.
+FG-007 Add shared developer tooling: .editorconfig, formatting, ESLint, pytest config, Vitest/Jest config, .env.example, and top-level README.
+FG-008 Document sequence diagrams for upload, extraction, review/edit, analysis, score, and FIRE flows.
+Exit: all three services start locally and contracts are frozen.
+
+Sprint 2
+Goal: wrap and normalize the engine, and build the database foundation.
+
+FG-009 Expose POST /run-engine in the Node service for tax, mf, and score modes.
+FG-010 Add fixture-based tests for engine inputs and outputs using sample tax and MF payloads.
+FG-011 Patch insightEngine.js so MF output includes canonical allocationPct.
+FG-012 Patch insightEngine.js so overlap items expose canonical similarity or equivalent score-ready fields.
+FG-013 Patch insightEngine.js so tax output includes deductions80C, bestRegime, missedDeductions, nps80CCD1B, grossIncome, and bestTax.
+FG-014 Patch score-engine comments and input naming so monthly income is the explicit contract.
+FG-015 Keep bank-statement logic internal only and exclude it from backend/public API integration.
+FG-016 Add SQLAlchemy models and Alembic migrations for users, profiles, extracted_data, normalized_profile, derived_data, actions, score_history, and jobs.
+FG-017 Add repository classes and a seeded demo user flow.
+FG-018 Add database smoke tests and migration verification.
+Exit: backend can persist demo-user data and call the Node engine with stable canonical outputs.
+
+Sprint 3
+Goal: implement upload, local storage, jobs, and extraction primitives.
+
+FG-019 Build file upload endpoints for /upload/form16 and /upload/cams with MIME/type/size validation.
+FG-020 Implement local-disk storage layout, file naming, and metadata persistence.
+FG-021 Build the jobs workflow with pending, processing, completed, and failed states.
+FG-022 Implement GET /job/{job_id} polling endpoint.
+FG-023 Add PDF text extraction service.
+FG-024 Add Tesseract OCR fallback for scanned PDFs.
+FG-025 Add cleaned-text preprocessing and regex extraction helpers.
+FG-026 Build Gemini client integration with strict function-calling and JSON-only handling.
+FG-027 Add PII stripping/redaction before LLM submission.
+FG-028 Implement retry-once and partial-result fallback rules.
+FG-029 Add extraction pipeline tests for success, OCR fallback, Gemini failure, and partial extraction.
+Exit: uploaded Form 16 and CAMS files produce raw extracted JSON and can be tracked through jobs.
+
+Sprint 4
+Goal: implement schema validation, review/edit flow, and normalization.
+
+FG-030 Define tiered Form 16 schemas for Level 1 core, Level 2 extended, and Level 3 advanced fields.
+FG-031 Define strict CAMS extraction schema and missing-field rules.
+FG-032 Build extraction validators that coerce missing values to null and reject hallucinated structure.
+FG-033 Implement critical-field detection so Tax Wizard blocks only when Level 1 fails.
+FG-034 Create editable extraction-review APIs for Form 16 and CAMS corrections.
+FG-035 Persist reviewed/manual-corrected values separately from raw extraction.
+FG-036 Implement normalization config with field maps, float conversion, ISO date conversion, and merge logic.
+FG-037 Build normalization services for Form 16 and CAMS into engine-ready payloads.
+FG-038 Add tests for review/edit persistence and normalization correctness.
+FG-039 Add normalization audit metadata so backend can trace raw -> reviewed -> normalized payloads.
+Exit: users can review extracted data, edit missing/wrong values, and generate normalized engine input.
+
+Sprint 5
+Goal: implement analysis, ranking, score, FIRE, and action tracking APIs.
+
+FG-040 Build /analyze/tax using normalized/reviewed Form 16 data and Node engine integration.
+FG-041 Build /analyze/mf using normalized/reviewed CAMS data and Node engine integration.
+FG-042 Implement insight ranking service using money 0.5 + risk 0.3 + urgency 0.2.
+FG-043 Build UI-transformation serializers for title, subtitle, impact, priority, and action.
+FG-044 Persist tax and MF derived reports in derived_data.
+FG-045 Build /score using profile data plus tax/MF reports, and persist score_history.
+FG-046 Build /fire with all required inputs, deterministic formulas, yearly plan, corpus target, and retirement-age projection.
+FG-047 Implement inferred-action generation from ranked insights.
+FG-048 Build action-tracking APIs for status and progress updates.
+FG-049 Add integration tests covering review/edit -> normalize -> analyze -> score -> FIRE.
+Exit: backend feature logic is complete for Tax, MF, score, FIRE, and actions.
+
+Sprint 6
+Goal: ship the usable mobile app shell and core user flows.
+
+FG-050 Build app navigation: Onboarding, Home, Upload, Tax, MF, FIRE, Profile, and Feature Detail.
+FG-051 Implement API client, authless demo-user bootstrap flow, and React Query cache keys.
+FG-052 Build Upload screen with file picker, job polling, and upload status UI.
+FG-053 Build extraction review/edit screens for Form 16 and CAMS.
+FG-054 Build Tax summary and detail screens using ranked insights and full report data.
+FG-055 Build MF summary and detail screens using portfolio, alerts, overlap, TER, and actions.
+FG-056 Build FIRE planner screen with required input form and output views.
+FG-057 Build Home screen with score card, trend graph, and top 3 actions.
+FG-058 Build Profile screen for monthly income, expenses, goals, and score/FIRE inputs.
+FG-059 Add empty, blocked, partial, retry, and failure states across all screens.
+FG-060 Add local cache hydration with AsyncStorage and invalidation hooks on data changes.
+Exit: the mobile app supports the full primary demo flow end to end.
+
+Sprint 7
+Goal: harden, document, and deploy v1.
+
+FG-061 Add backend unit tests for ranking, normalization helpers, FIRE formulas, and action generation.
+FG-062 Add engine adapter regression tests against pinned fixtures.
+FG-063 Add frontend smoke tests for upload, review, analysis display, and score display.
+FG-064 Add observability basics: structured logs, request IDs, job error capture, and health checks.
+FG-065 Write full README.md with setup, architecture, API docs, pipeline details, and limitations.
+FG-066 Add deployment config for FastAPI service on Render.
+FG-067 Add deployment config for Node engine service on Render.
+FG-068 Document local-disk upload path assumptions and Render persistent-disk setup.
+FG-069 Create sample .env.production documentation and release checklist.
+FG-070 Run final end-to-end validation in deployed environments and fix release blockers.
+Exit: v1 is documented, tested, and deployable on Render.
+
+Recommended Gates
+
+Gate A: after Sprint 2, contracts and engine integration are stable.
+Gate B: after Sprint 4, extraction and normalization are usable.
+Gate C: after Sprint 5, backend product logic is feature-complete.
+Gate D: after Sprint 6, mobile app is feature-complete.
+Gate E: after Sprint 7, release candidate is ready.
